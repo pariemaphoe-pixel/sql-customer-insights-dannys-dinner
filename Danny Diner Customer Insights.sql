@@ -110,3 +110,46 @@ SELECT
    customer_id,product_name,order_count
    FROM popular_items 
    WHERE rank =1;
+
+-- COMMAND ----------
+
+---Which item was purchased first by the customer after they became a member?
+
+WITH pre_membership_purchases AS (
+    SELECT 
+        s.`customer_id`,
+        s.`order_date`,
+        m.`join_date`,
+        mn.`product_name`,
+        mn.`price`
+    FROM `workspace`.`dannys_diner`.`sales` s
+    JOIN `workspace`.`dannys_diner`.`members` m 
+        ON s.`customer_id` = m.`customer_id`
+    JOIN `workspace`.`dannys_diner`.`menu` mn 
+        ON s.`product_id` = mn.`product_id`
+    WHERE s.`order_date` < m.`join_date`
+),
+ranked_purchases AS (
+    SELECT 
+        `customer_id`,
+        `order_date`,
+        `join_date`,
+        `product_name`,
+        `price`,
+        RANK() OVER (PARTITION BY `customer_id` ORDER BY `order_date` DESC) as date_rank
+    FROM pre_membership_purchases
+)
+SELECT 
+    `customer_id`,
+    `order_date`,
+    `product_name`,
+    `price`
+FROM ranked_purchases
+WHERE date_rank = 1
+ORDER BY `customer_id`
+
+  
+
+-- COMMAND ----------
+
+
