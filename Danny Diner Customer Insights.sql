@@ -87,3 +87,26 @@ SELECT m.product_name,COUNT(s.product_id ) AS count_purchased
  GROUP BY m.product_name
  ORDER BY count_purchased DESC
  LIMIT 1;
+
+-- COMMAND ----------
+
+---Which item was the most popular for each customer?
+SELECT m.product_name,s.Customer_id,Count(s.product_id)as most_popular_item
+FROM menu m
+INNER JOIN sales s
+ON m.product_id=s.product_id
+GROUP BY m.product_name,s.Customer_id
+ORDER BY most_popular_item DESC
+LIMIT 3;
+
+WITH popular_items AS(SELECT
+                           s.customer_id,m.product_name,count(s.product_id)AS order_count,
+                           DENSE_RANK() OVER (PARTITION BY s.customer_id ORDER BY COUNT(s.product_id)DESC) as rank
+                           FROM sales s
+                           JOIN menu m ON s.product_id = m.product_id
+                           GROUP BY s.customer_id, m.product_name
+)
+SELECT 
+   customer_id,product_name,order_count
+   FROM popular_items 
+   WHERE rank =1;
