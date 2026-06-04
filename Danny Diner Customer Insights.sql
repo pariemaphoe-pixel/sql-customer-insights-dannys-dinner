@@ -153,14 +153,77 @@ ORDER BY `customer_id`
 -- COMMAND ----------
 
 --What is the total items and amount spent for each member before they became a member?
-  WITH Total_amount_spent AS
-(SELECT m.product_name,s.customer_id,s.order_date,mb.join_date,m.price
-FROM menu m
-INNER JOIN sales s
-ON m.product_id=s.product_id
-INNER JOIN members mb
-ON mb.customer_id=s.customer_id)
-SELECT customer_id,COUNT(product_name),SUM(price)
-FROM Total_amount_spent
-WHERE order_date < join_date
-GROUP BY customer_id;
+ SELECT
+  s.customer_id,
+  SUM(
+    CASE
+      WHEN m.product_id = 1 THEN m.price * 10 * 2
+      ELSE m.price * 10
+    END
+  ) as total_points
+FROM
+  workspace.dannys_diner.sales s
+    JOIN workspace.dannys_diner.menu m
+      ON s.product_id = m.product_id
+GROUP BY
+  s.customer_id
+ORDER BY
+  s.customer_id
+
+-- COMMAND ----------
+
+---If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
+WITH Total_points AS (
+      SELECT s.customer_id,
+   SUM(CASE WHEN m.product_id = 1 THEN (price * 10)
+          WHEN m.product_id = 2 THEN (price * 20)
+          WHEN m.product_id = 3 THEN (price * 10)
+          ELSE 0
+     END) AS points_per_product
+  FROM menu m
+  INNER JOIN sales s ON m.product_id = s.product_id
+  GROUP BY s.customer_id
+)
+SELECT *
+FROM Total_points;
+
+
+----In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
+
+WITH Total_points AS (
+      SELECT s.customer_id,
+     SUM(CASE WHEN s.order_date >= mb.join_date AND  s.order_date < DATEADD(day, 7 ,mb.join_date)
+      THEN price * 20
+      ELSE 0
+      END) AS first_week_points,
+   SUM(CASE WHEN m.product_id = 1 THEN (price * 10)
+          WHEN m.product_id = 2 THEN (price * 20)
+          WHEN m.product_id = 3 THEN (price * 10)
+          ELSE 0
+     END) AS points_per_product
+  FROM menu m
+  INNER JOIN sales s ON m.product_id = s.product_id
+  INNER JOIN members mb ON s.customer_id = mb.customer_id
+  GROUP BY s.customer_id
+)
+SELECT *
+FROM Total_points; 
+
+-- COMMAND ----------
+
+SELECT
+  s.customer_id,
+  SUM(
+    CASE
+      WHEN m.product_id = 1 THEN m.price * 10 * 2
+      ELSE m.price * 10
+    END
+  ) as total_points
+FROM
+  workspace.dannys_diner.sales s
+    JOIN workspace.dannys_diner.menu m
+      ON s.product_id = m.product_id
+GROUP BY
+  s.customer_id
+ORDER BY
+  s.customer_id
