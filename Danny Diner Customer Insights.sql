@@ -1,5 +1,6 @@
 -- Databricks notebook source
-CREATE TABLE  sales(
+
+CREATE TABLE IF NOT EXISTS  sales(
   customer_id varchar(5),
   order_date date,
   product_id int);
@@ -23,7 +24,7 @@ CREATE TABLE  sales(
   ('C', '2021-01-07', '3');
 
 
-  CREATE TABLE menu (
+  CREATE TABLE IF NOT EXISTS menu  (
   product_id INTEGER,
   product_name VARCHAR(5),
   price INTEGER
@@ -53,4 +54,8 @@ VALUES
 
 -- COMMAND ----------
 
-
+SELECT s.customer_id,Sum(m.price)
+ FROM sales s
+ LEFT JOIN menu m
+ ON s.product_id=m.product_id
+ GROUP BY s.customer_id;
