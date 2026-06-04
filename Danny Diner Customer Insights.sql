@@ -76,3 +76,14 @@ GROUP BY customer_id;
  ON m.product_id=s.product_id
  WHERE order_date = '2021-01-01'
  GROUP BY m.product_name,s.customer_id;
+
+-- COMMAND ----------
+
+---What is the most purchased item on the menu and how many times was it purchased by all customers?
+SELECT m.product_name,COUNT(s.product_id ) AS count_purchased
+ FROM menu m
+ INNER JOIN sales s
+ ON m.product_id=s.product_id
+ GROUP BY m.product_name
+ ORDER BY count_purchased DESC
+ LIMIT 1;
