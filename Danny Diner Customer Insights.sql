@@ -59,3 +59,10 @@ SELECT s.customer_id,Sum(m.price)
  LEFT JOIN menu m
  ON s.product_id=m.product_id
  GROUP BY s.customer_id;
+
+-- COMMAND ----------
+
+---How many days has each customer visited the restaurant?
+SELECT customer_id,COUNT(order_date)
+FROM sales
+GROUP BY customer_id;
