@@ -152,4 +152,15 @@ ORDER BY `customer_id`
 
 -- COMMAND ----------
 
-
+--What is the total items and amount spent for each member before they became a member?
+  WITH Total_amount_spent AS
+(SELECT m.product_name,s.customer_id,s.order_date,mb.join_date,m.price
+FROM menu m
+INNER JOIN sales s
+ON m.product_id=s.product_id
+INNER JOIN members mb
+ON mb.customer_id=s.customer_id)
+SELECT customer_id,COUNT(product_name),SUM(price)
+FROM Total_amount_spent
+WHERE order_date < join_date
+GROUP BY customer_id;
