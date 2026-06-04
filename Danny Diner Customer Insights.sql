@@ -66,3 +66,13 @@ SELECT s.customer_id,Sum(m.price)
 SELECT customer_id,COUNT(order_date)
 FROM sales
 GROUP BY customer_id;
+
+-- COMMAND ----------
+
+---What was the first item from the menu purchased by each customer?
+ SELECT m.product_name,s.customer_id
+ FROM menu m
+ INNER JOIN sales s
+ ON m.product_id=s.product_id
+ WHERE order_date = '2021-01-01'
+ GROUP BY m.product_name,s.customer_id;
